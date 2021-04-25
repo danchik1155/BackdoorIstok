@@ -67,13 +67,25 @@ class Istok(QtWidgets.QMainWindow):
         self.wind = Ui_Istok()
         self.wind.setupUi(self)
         self.initiation()
-        self.data, self.api_response = connection()
+
+
+
 
     def initiation(self):
         self.wind.setupUi(self)
         self.wind.Allcomp.clicked.connect(self.open_Allcomp)  # Все компании
         self.wind.Relevcomp.clicked.connect(self.open_Relevcomp)  # Наиболее релевантные
         self.wind.Detail.clicked.connect(self.open_Detail)  # Детальное отслеживание
+        self.data, self.api_response = connection()
+
+        try:
+            f  = open("favorites.txt", 'r')
+            self.favorites = f.read().split("\n")
+            f.close()
+        except FileNotFoundError:
+            f = open("favorites.txt", 'w')
+            f.close()
+            self.favorites = []
 
     def open_Allcomp(self):  # Все компании
         self.dialogAll = Ui_List()
@@ -90,7 +102,15 @@ class Istok(QtWidgets.QMainWindow):
     def open_Detail(self):  # Детальное отслеживание
         self.dialogDet = Ui_Favorites()
         self.dialogDet.setupUi(self)
+
+        self.schet = 0
+        favlist = ""
+        for word in self.favorites:
+            favlist = favlist + word + "\n"
+        self.dialogDet.Favlist.setText(favlist)
+
         self.dialogDet.Add.clicked.connect(self.open_Add)
+        self.dialogDet.Delete.clicked.connect(self.open_Delete)
         self.dialogDet.Back.clicked.connect(self.backbutton)
 
     def open_Add(self):
@@ -98,14 +118,20 @@ class Istok(QtWidgets.QMainWindow):
         self.dialogAdd.setupUi(self)
         self.dialogAdd.Go.clicked.connect(self.search)
         self.dialogAdd.Back.clicked.connect(self.backbutton)
-        self.schet = 0
+        self.dialogAdd.Choose.clicked.connect(self.chooseAdd)
+
+    def open_Delete(self):
+        self.dialogAdd = Ui_Search()
+        self.dialogAdd.setupUi(self)
+        self.dialogAdd.Go.clicked.connect(self.search)
+        self.dialogAdd.Back.clicked.connect(self.backbutton)
+        self.dialogAdd.Choose.clicked.connect(self.chooseDelete)
 
     def search(self):
+        self.schet = 0
         text = self.data.split('\n')
         sub_str = self.dialogAdd.Searchline.text()
-
         words = ""
-
         low_sub_str = sub_str.lower()
         for word in text:
             if low_sub_str in word.lower():
@@ -113,8 +139,34 @@ class Istok(QtWidgets.QMainWindow):
                 self.schet += 1
         if words != "":
             self.dialogAdd.Result.setText(words)
+            self.keyWord = words
         else:
             self.dialogAdd.Result.setText("Такой компании нет")
+
+    def chooseAdd(self):
+        if self.schet == 1:
+            print('Ok')
+            if self.dialogAdd.Searchline.text() in self.favorites:
+                print("already in favorites")
+            else:
+                self.favorites.append(self.keyWord)
+                self.writefavs()
+
+    def chooseDelete(self):
+        if self.schet == 1:
+            print('Ok')
+            if self.dialogAdd.Searchline.text() in self.favorites:
+                self.favorites.pop(self.favorites.index(self.keyWord))
+                self.writefavs()
+            else:
+                print("not in favorites")
+
+
+    def writefavs(self):
+        f = open("favorites.txt", "w")
+        for word in self.favorites:
+            f.write(word + "\n")
+        f.close()
 
     def backbutton(self):
         self.initiation()
