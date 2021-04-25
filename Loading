@@ -2,3 +2,4 @@ pyuic5 UI/favorites.ui -o Favorites.py
 pyuic5 UI/Istok_relevants.ui -o Istok_relevants.py
 pyuic5 UI/MainIstok.ui -o MainIstok.py
 pyuic5 UI/Search.ui -o Search.py
+pyuic5 UI/Allcomp.ui -o Allcomp.py

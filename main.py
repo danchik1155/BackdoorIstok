@@ -2,13 +2,14 @@ from PyQt5 import QtWidgets
 import time
 
 from MainIstok import Ui_Istok
+from Allcomp import UI_All
 
 class Istok(QtWidgets.QMainWindow):
     def __init__(self):
         super(Istok, self).__init__()
         self.wind = Ui_Istok()
-        self.initiation()
         self.wind.setupUi(self)
+#         self.initiation()
 #         self.wind.Enter.clicked.connect(self.entering)
 #
 #     def initiation(self):
@@ -484,6 +485,6 @@ class Istok(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    window = Tokb()
+    window = Istok()
     window.show()
     app.exec_()

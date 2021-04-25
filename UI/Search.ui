@@ -14,7 +14,7 @@
    <string>Search</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QLineEdit" name="Searchline">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -35,7 +35,7 @@
      <string>Поиск</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="Go">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -53,7 +53,7 @@
      <string>GO</string>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="textBrowser">
+   <widget class="QTextBrowser" name="Result">
     <property name="geometry">
      <rect>
       <x>30</x>

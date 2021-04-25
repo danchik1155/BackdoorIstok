@@ -11,34 +11,34 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(358, 250)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+class Ui_Favorites(object):
+    def setupUi(self, Favorites):
+        Favorites.setObjectName("Favorites")
+        Favorites.resize(358, 250)
+        self.centralwidget = QtWidgets.QWidget(Favorites)
         self.centralwidget.setObjectName("centralwidget")
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(190, 10, 140, 31))
+        self.Delete = QtWidgets.QPushButton(self.centralwidget)
+        self.Delete.setGeometry(QtCore.QRect(190, 10, 140, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
-        self.pushButton.setFont(font)
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(30, 10, 140, 31))
+        self.Delete.setFont(font)
+        self.Delete.setObjectName("Delete")
+        self.Add = QtWidgets.QPushButton(self.centralwidget)
+        self.Add.setGeometry(QtCore.QRect(30, 10, 140, 31))
         font = QtGui.QFont()
         font.setPointSize(12)
-        self.pushButton_2.setFont(font)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.textBrowser = QtWidgets.QTextBrowser(self.centralwidget)
-        self.textBrowser.setGeometry(QtCore.QRect(30, 50, 300, 192))
-        self.textBrowser.setObjectName("textBrowser")
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.Add.setFont(font)
+        self.Add.setObjectName("Add")
+        self.Favlist = QtWidgets.QTextBrowser(self.centralwidget)
+        self.Favlist.setGeometry(QtCore.QRect(30, 50, 300, 192))
+        self.Favlist.setObjectName("Favlist")
+        Favorites.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(Favorites)
+        QtCore.QMetaObject.connectSlotsByName(Favorites)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, Favorites):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Favorites"))
-        self.pushButton.setText(_translate("MainWindow", "Удалить"))
-        self.pushButton_2.setText(_translate("MainWindow", "Добавить"))
+        Favorites.setWindowTitle(_translate("Favorites", "Favorites"))
+        self.Delete.setText(_translate("Favorites", "Удалить"))
+        self.Add.setText(_translate("Favorites", "Добавить"))
