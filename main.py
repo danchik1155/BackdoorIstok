@@ -1,16 +1,83 @@
+import requests
+import json
+
 from PyQt5 import QtWidgets
 import time
 
 from MainIstok import Ui_Istok
-from Allcomp import UI_All
+from Allcomp import Ui_List
+from Istok_relevants import  Ui_Istok_relevants
+from Favorites import  Ui_Favorites
+
+
+def connection():
+    params = {
+        'access_key': '2b4183b16afefdf531be92c7fe94e413'
+    }
+    # api_result = requests.get('http://api.marketstack.com/v1/tickers/aapl/eod', params)
+    api_result = requests.get('http://api.marketstack.com/v1/tickers', params)
+    api_response = api_result.json()
+
+    data = ''
+    symbols = ''
+    i = 0
+    for stock_data in api_response['data']:
+        data = data + stock_data['name'] + "\n"
+        if i == 0:
+            symbols = stock_data['symbol']
+        if i < 97:
+            symbols = symbols + "," + stock_data['symbol']
+        i += 1
+
+    params = {
+        'access_key': '2b4183b16afefdf531be92c7fe94e413',
+        'symbols': symbols
+    }
+
+    api_result = requests.get('http://api.marketstack.com/v1/eod/latest', params)
+
+    api_response = api_result.json()
+
+    return data, api_response
+
 
 class Istok(QtWidgets.QMainWindow):
     def __init__(self):
         super(Istok, self).__init__()
         self.wind = Ui_Istok()
         self.wind.setupUi(self)
-#         self.initiation()
-#         self.wind.Enter.clicked.connect(self.entering)
+        self.initiation()
+
+    def initiation(self):
+        self.wind.setupUi(self)
+        self.wind.Allcomp.clicked.connect(self.open_Allcomp)
+        self.wind.Relevcomp.clicked.connect(self.open_Relevcomp)
+        self.wind.Detail.clicked.connect(self.open_Detail)
+
+    def open_Allcomp(self):
+        self.dialogAll = Ui_List()
+        self.dialogAll.setupUi(self)
+        self.dialgAll.Back.clicked.connect(self.backbutton)
+        #data, api_response = connection()
+
+        data = "*-*"
+
+        print(data)
+        self.dialogAll.textBrowser.setText(data)
+
+    def open_Relevcomp(self):
+        self.dialgRelev = Ui_Istok_relevants()
+        self.dialgRelev.setupUi(self)
+        self.dialgRelev.Back.clicked.connect(self.backbutton)
+
+    def open_Detail(self):
+        self.dialgDet = Ui_Favorites()
+        self.dialgDet.setupUi(self)
+        self.dialgDet.Back.clicked.connect(self.backbutton)
+
+    def backbutton(self):
+        self.ininiation()
+
 #
 #     def initiation(self):
 #         self.tryes = 3

@@ -62,6 +62,12 @@ class Ui_Istok_relevants(object):
         font.setPointSize(8)
         self.Name2.setFont(font)
         self.Name2.setObjectName("Name2")
+        self.Back = QtWidgets.QPushButton(self.centralwidget)
+        self.Back.setGeometry(QtCore.QRect(20, 5, 140, 31))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.Back.setFont(font)
+        self.Back.setObjectName("Back")
         Istok_relevants.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(Istok_relevants)
@@ -73,3 +79,4 @@ class Ui_Istok_relevants(object):
         self.right.setText(_translate("Istok_relevants", ">"))
         self.left.setText(_translate("Istok_relevants", "<"))
         self.label.setText(_translate("Istok_relevants", "PAGE"))
+        self.Back.setText(_translate("Istok_relevants", "Назад"))
