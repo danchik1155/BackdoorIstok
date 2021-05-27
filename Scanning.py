@@ -49,8 +49,8 @@ def sscan():
     end_point = 255
 
     t1 = datetime.now()
-    print("Scanning in Progress:")
-    print('IP                 Status          Name            MAC')
+    #print("Scanning in Progress:")
+    #print('IP                 Status          Name            MAC')
     strin = []
     for ip in range(start_point, end_point):
         if ip == int(net_split[3]):
