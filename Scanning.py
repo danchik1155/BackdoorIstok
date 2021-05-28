@@ -3,6 +3,7 @@ import platform
 import threading
 import socket
 from datetime import datetime
+import subprocess as sp
 
 def getMyIp():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Создаем сокет (UDP)
@@ -26,11 +27,15 @@ def scan_Ip(ip, strin):
     comm = ping_com + addr
     response = os.popen(comm)
     data = response.readlines()
+    #response = sp.Popen(comm)
+    #data = response.communicate()[0]
     name = data[1].split(' ')
     for line in data:
         if 'TTL' in line:
             response_art = os.popen('arp -a')
             data_arp = response_art.readlines()
+            #response_art = sp.Popen('arp -a')
+            #data_arp = response_art.communicate()
             for line_arp in data_arp:
                 flag = line_arp.split()
                 if len(flag) > 0 and flag[0] == addr:

